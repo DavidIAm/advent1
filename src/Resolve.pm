@@ -18,12 +18,17 @@ sub turn {
   return Resolve->new($self->{x}, $self->{y}, $self->{direction}->()->{$direction});
 }
 
+sub goOne {
+  my ($self) = @_;
+  return Resolve->new(
+    $self->{x} + $self->{direction}->()->{dx},
+    $self->{y} + $self->{direction}->()->{dy},
+    $self->{direction});
+}
+
 sub go {
   my ($self, $distance) = @_;
-  return Resolve->new(
-    $self->{x} + $self->{direction}->()->{dx}*$distance, 
-    $self->{y} + $self->{direction}->()->{dy}*$distance, 
-    $self->{direction});
+  return reduce { $a->goOne } $self, 1..$distance;
 }
 
 sub stopWhereVisitCountMatches {
