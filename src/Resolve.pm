@@ -10,11 +10,25 @@ sub new {
 sub turnAndGo {
   my ($self, $move) = @_;
   my ($initial, $distance) = $move =~ /^([RL])([0-9]+)/;
-  my $newDirection = $self->{direction}->()->{$initial};
+  return $self->turn($initial)->go($distance);
+}
+
+sub turn {
+  my ($self, $direction) = @_;
+  return Resolve->new($self->{x}, $self->{y}, $self->{direction}->()->{$direction});
+}
+
+sub go {
+  my ($self, $distance) = @_;
   return Resolve->new(
-    $self->{x} + $newDirection->()->{dx}*$distance, 
-    $self->{y} + $newDirection->()->{dy}*$distance, 
-    $newDirection);
+    $self->{x} + $self->{direction}->()->{dx}*$distance, 
+    $self->{y} + $self->{direction}->()->{dy}*$distance, 
+    $self->{direction});
+}
+
+sub stopWhereVisitCountMatches {
+  my ($self, $count, @moves) = @_;
+
 }
 
 sub move {
