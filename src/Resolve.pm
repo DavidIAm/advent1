@@ -7,10 +7,20 @@ sub new {
   my $self = bless {x => $x +0, y => $y+0, direction => $direction||\&NORTH}, $name;
 }
 
+sub parseMove {
+  my ($self, $move) = @_;
+  return ($initial, $distance) = $move =~ /^([RL])([0-9]+)/;
+}
+
+sub turnAndTrace {
+  my ($self, $move) = @_;
+  my ($initial, $distance) = $self->parseMove($move);
+  return $self->turn($initial)->go($distance);
+}
+
 sub turnAndGo {
   my ($self, $move) = @_;
-  my ($initial, $distance) = $move =~ /^([RL])([0-9]+)/;
-  return $self->turn($initial)->go($distance);
+  return ($self->turnAndTrace($move))[-1];
 }
 
 sub turn {
@@ -28,18 +38,36 @@ sub goOne {
 
 sub go {
   my ($self, $distance) = @_;
-  return reduce { $a->goOne } $self, 1..$distance;
+  my @stack = ();
+  for (1..$distance) {
+    push @stack, ($stack[-1]||$self)->goOne;
+  }
+  return @stack;
 }
 
 sub stopWhereVisitCountMatches {
   my ($self, $count, @moves) = @_;
+  my %visitCounter = {};
+  foreach ($self->trace(@moves)) {
+    $visitCounter->{$_->{x}}->{$_->{y}} ++;
+    return $_ if $visitCounter->{$_->{x}}->{$_->{y}} == $count;
+  }
+  return $self;
+}
 
+sub trace {
+  my ($self, @moves) = @_;
+  my @stack = ($self);
+  foreach (@moves) {
+    push @stack, ($stack[-1])->turnAndTrace($_);
+  }
+  return @stack;
 }
 
 sub move {
-  my ($self, $first, @moves) = @_;
+  my ($self, @moves) = @_;
   return reduce { 
-    $a->turnAndGo($b) } $self->turnAndGo($first), @moves;
+    $a->turnAndGo($b) } $self, @moves;
 }
 
 sub taxiDistance {

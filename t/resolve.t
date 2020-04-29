@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use lib '../src';
-use Test::More tests => 22;
+use Test::More tests => 43;
 use Resolve;
 
 my $resolver = new Resolve;
@@ -54,4 +54,41 @@ is( $u->taxiDistance(), 0, "right and distance 0") ;
 my @input = qw(R1 L2 L1 L2);
 ok( $resolver->move(@input)->taxiDistance() == 0, "Can handle ending up back home" );
 
+my @input = qw(R1);
+my @trace = $resolver->go(5);
+  is( $resolver->{x}, 0, "x0th");
+  is( $resolver->{y}, 0, "y0th");
+  is( $trace[0]->{x}, 1, "x1th");
+  is( $trace[0]->{y}, 0, "y1th");
+  is( $trace[1]->{x}, 2, "x2th");
+  is( $trace[1]->{y}, 0, "y2th");
+  is( $trace[2]->{x}, 3, "x3th");
+  is( $trace[2]->{y}, 0, "y3th");
+  is( $trace[3]->{x}, 4, "yx4th");
+  is( $trace[3]->{y}, 0, "y4th");
+  is( $trace[4]->{x}, 5, "x5th");
+  is( $trace[4]->{y}, 0, "y5th");
+
+# step list
+
+my @steps = $resolver->trace(qw/R8 R4 R4 R8/);
+{ my $underTest = shift @steps;
+  is( $underTest->{x}, 0, "x0th");
+  is( $underTest->{y}, 0, "y0th");
+}
+{ my $underTest = shift @steps;
+  is( $underTest->{x}, 0, "x1th");
+  is( $underTest->{y}, 1, "y1th");
+}
+{ my $underTest = shift @steps;
+  is( $underTest->{x}, 0, "x2th");
+  is( $underTest->{y}, 2, "y2th");
+}
+{ my $underTest = shift @steps;
+  is( $underTest->{x}, 0, "x3th");
+  is( $underTest->{y}, 3, "y3th");
+}
+
+# The second test case
+is($resolver->stopWhereVisitCountMatches(2, qw/R8 R4 R4 R8/)->taxiDistance(), 4, "Test case second hit");
 

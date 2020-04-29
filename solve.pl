@@ -6,6 +6,6 @@ use lib 'src';
 
 use Resolve;
 
-print Resolve->new()->move(split /, ?/, join '', <>)->taxiDistance;
+print Resolve->new()->stopWhereVisitCountMatches(2, split /, ?/, join '', <>)->taxiDistance;
 
 print "\n";
